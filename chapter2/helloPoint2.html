@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="../lib/webgl-utils.js"></script>
+  <script src="../lib/webgl-debug.js"></script>
+  <script src="../lib/cuon-utils.js"></script>
+</head>
+
+<body onload="main()">
+  <canvas id="main" width="400" height="400">Please use a browser that supports canvas</canvas>
+  <script>
+    // vertex shader
+    const VSHADER_SOURCE = `
+      attribute vec4 a_Position;
+      attribute float a_PointSize;
+      void main() {
+        gl_Position = a_Position;
+        gl_PointSize = a_PointSize;
+      }
+    `
+    // fragment shader
+    const FSHADER_SOURCE = `
+      void main() {
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+      }
+    `
+
+    function main() {
+      const canvas = document.querySelector('#main')
+      if (!canvas) return
+      window.gl = canvas.getContext('webgl')
+
+      // 执行着色器
+      if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+        console.error('Failed to get the rendering context for WebGL')
+        return false
+      }
+
+      // 获取变量 a_Position 的位置
+      const aPosition = gl.getAttribLocation(gl.program, 'a_Position')
+      if (aPosition < 0) {
+        console.error('Failed to get the stroage location of a_Position')
+        return false
+      }
+
+      const aPointSize = gl.getAttribLocation(gl.program, 'a_PointSize')
+      if (aPointSize < 0) {
+        console.error('Failed to get the stroage location of a_PointSize')
+        return false
+      }
+
+      // 声明矢量
+      const position = new Float32Array([0.0, 0.0, 0.0, 1.0])
+      // 将顶点位置传输给attribute变量
+      gl.vertexAttrib4fv(aPosition, position)
+      // vertexAttrib1fv
+      // vertexAttrib2fv
+      // vertexAttrib3fv
+      // vertexAttrib4fv
+
+      // 将顶点位置传输给attribute变量
+      // gl.vertexAttrib3f(aPosition, 0.0, 0.0, 0.0) // 直接传值
+      // vertexAttrib1f(location, 0.0)
+      // vertexAttrib2f(location, 0.0, 0.0)
+      // vertexAttrib3f(location, 0.0, 0.0, 0.0)
+      // vertexAttrib4f(location, 0.0, 0.0, 0.0, 1.0)
+      
+      gl.vertexAttrib1f(aPointSize, 20.0)
+
+      // 指定canvas的颜色
+      gl.clearColor(0.0, 0.0, 0.0, 1.0)
+      // 清空<canvas>
+      gl.clear(gl.COLOR_BUFFER_BIT)
+
+      gl.drawArrays(gl.POINTS, 0, 1)
+    }
+  </script>
+</body>
+
+</html>

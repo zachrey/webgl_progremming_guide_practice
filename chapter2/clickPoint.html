@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="../lib/webgl-utils.js"></script>
+  <script src="../lib/webgl-debug.js"></script>
+  <script src="../lib/cuon-utils.js"></script>
+</head>
+
+<body onload="main()">
+  <canvas id="main" width="400" height="400">Please use a browser that supports canvas</canvas>
+  <script>
+    // vertex shader
+    const VSHADER_SOURCE = `
+      attribute vec4 a_Position;
+      void main() {
+        gl_Position = a_Position;
+        gl_PointSize = 10.0;
+      }
+    `
+    // fragment shader
+    const FSHADER_SOURCE = `
+      void main() {
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+      }
+    `
+
+    function main() {
+      const canvas = document.querySelector('#main')
+      if (!canvas) return
+      window.gl = canvas.getContext('webgl')
+
+      // 执行着色器
+      if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+        console.error('Failed to get the rendering context for WebGL')
+        return false
+      }
+
+
+      const aPosition = gl.getAttribLocation(gl.program, 'a_Position')
+
+      canvas.onmousedown = function(ev) {
+        click(ev, gl, canvas, aPosition)
+      }
+
+      // 指定canvas的颜色
+      gl.clearColor(0.0, 0.0, 0.0, 1.0)
+      // 清空<canvas>
+      gl.clear(gl.COLOR_BUFFER_BIT)
+    }
+    
+    const positions = []
+    function click(ev, gl, canvas, aPosition) {
+      let x = ev.clientX
+      let y = ev.clientY
+      let rect = ev.target.getBoundingClientRect()
+
+      x = ((x - rect.left) - canvas.width / 2) / (canvas.width / 2)
+      y = (canvas.height / 2 - (y - rect.top)) / (canvas.height / 2)
+      positions.push([x, y])
+
+      // 清空<canvas>
+      gl.clear(gl.COLOR_BUFFER_BIT) // 每次绘制都需要重绘，不然颜色缓存取会被情况，就会变成默认的了
+
+      for(let i=0; i<positions.length; i++) {
+        gl.vertexAttrib3f(aPosition, positions[i][0], positions[i][1], 0.0)
+
+        gl.drawArrays(gl.POINTS, 0, 1)
+      }
+    }
+
+  </script>
+</body>
+
+</html>

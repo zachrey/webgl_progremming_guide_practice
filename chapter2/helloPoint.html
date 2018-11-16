@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="../lib/webgl-utils.js"></script>
+  <script src="../lib/webgl-debug.js"></script>
+  <script src="../lib/cuon-utils.js"></script>
+</head>
+<body onload="main()">
+  <canvas id="main" width="400" height="400">Please use a browser that supports canvas</canvas>
+  <script>
+    // vertex shader
+    const VSHADER_SOURCE = `
+      void main() {
+        gl_Position = vec4(0.5, 0.5, 0.0, 1);
+        gl_PointSize = 10.0;
+      }
+    `
+    // fragment shader
+    const FSHADER_SOURCE = `
+      void main() {
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+      }
+    `
+
+    function main() {
+      const canvas = document.querySelector('#main')
+      if (!canvas) return
+      window.gl = canvas.getContext('webgl')
+      
+      // 执行着色器
+      if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+        console.error('Failed to get the rendering context for WebGL')
+        return false
+      }
+
+      // 指定canvas的颜色
+      gl.clearColor(0.0, 0.0, 0.0, 1.0)
+      // 清空<canvas>
+      gl.clear(gl.COLOR_BUFFER_BIT)
+
+      gl.drawArrays(gl.POINTS, 0, 1)
+    }
+  </script>
+</body>
+</html>

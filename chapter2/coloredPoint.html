@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="../lib/webgl-utils.js"></script>
+  <script src="../lib/webgl-debug.js"></script>
+  <script src="../lib/cuon-utils.js"></script>
+</head>
+
+<body onload="main()">
+  <canvas id="main" width="400" height="400">Please use a browser that supports canvas</canvas>
+  <script>
+    // vertex shader
+    const VSHADER_SOURCE = `
+      attribute vec4 a_Position;
+      void main() {
+        gl_Position = a_Position;
+        gl_PointSize = 10.0;
+      }
+    `
+    // fragment shader
+    const FSHADER_SOURCE = `
+      precision mediump float;
+      uniform vec4 u_FragColor;
+      void main() {
+        gl_FragColor = u_FragColor;
+      }
+    `
+
+    function main() {
+      const canvas = document.querySelector('#main')
+      if (!canvas) return
+      window.gl = canvas.getContext('webgl')
+
+      // 执行着色器
+      if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+        console.error('Failed to get the rendering context for WebGL')
+        return false
+      }
+
+
+      const aPosition = gl.getAttribLocation(gl.program, 'a_Position') // return -1 or int
+      const uColor = gl.getUniformLocation(gl.program, 'u_FragColor') // return null or int
+
+      if (aPosition < 0 || !uColor) {
+        console.error('Failed to get the storage location of "a_Position" or "u_FragColor"')
+        return false
+      }
+
+      canvas.onmousedown = function(ev) {
+        click(ev, gl, canvas, aPosition, uColor)
+      }
+
+      // 指定canvas的颜色
+      gl.clearColor(0.0, 0.0, 0.0, 1.0)
+      // 清空<canvas>
+      gl.clear(gl.COLOR_BUFFER_BIT)
+    }
+    
+    const positions = []
+    const colors = []
+    function click(ev, gl, canvas, aPosition, uColor) {
+      let x = ev.clientX
+      let y = ev.clientY
+      let rect = ev.target.getBoundingClientRect()
+
+      x = ((x - rect.left) - canvas.width / 2) / (canvas.width / 2)
+      y = (canvas.height / 2 - (y - rect.top)) / (canvas.height / 2)
+      positions.push([x, y])
+      
+      if (x>0 && y>0) {
+        colors.push([1.0, 0.0, 0.0, 1.0])
+      } else if (x<0 && y<0) {
+        colors.push([0.0, 1.0, 0.0, 1.0])
+      } else {
+        colors.push([1.0, 1.0, 1.0, 1.0])
+      }
+
+      // 清空<canvas>
+      gl.clear(gl.COLOR_BUFFER_BIT)
+
+      for(let i=0; i<positions.length; i++) {
+        gl.vertexAttrib3f(aPosition, positions[i][0], positions[i][1], 0.0)
+        gl.uniform4f(uColor, colors[i][0], colors[i][1], colors[i][2], colors[i][3])
+        //uniform1f 这四 默认值为 0.0 0.0 0.0 1.0
+        //uniform2f
+        //uniform3f
+        gl.drawArrays(gl.POINTS, 0, 1)
+      }
+    }
+
+  </script>
+</body>
+
+</html>
